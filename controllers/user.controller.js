@@ -7,6 +7,8 @@ import asyncHandler from '../middlewares/asyncHandler.middleware.js';
 import AppError from '../utils/AppError.js';
 import User from '../models/user.model.js';
 import sendEmail from '../utils/sendEmail.js';
+import { EnrolledUsersIYFA, EnrolledUsersYLP } from '../models/enrolledUsers.model.js';
+import Course from '../models/course.model.js';
 
 const cookieOptions = {
   secure: process.env.NODE_ENV === 'production' ? true : false,
@@ -353,7 +355,7 @@ export const changePassword = asyncHandler(async (req, res, next) => {
  * @UPDATE_USER
  * @ROUTE @PUT {{URL}}/api/v1/user/update/:id
  * @ACCESS Private (Logged in user only)
- */ 
+ */
 export const updateUser = asyncHandler(async (req, res, next) => {
   // Destructuring the necessary data from the req object
   const { fullName } = req.body;
@@ -405,5 +407,68 @@ export const updateUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: 'User details updated successfully',
+  });
+});
+
+/**
+ * @UPDATE_USER
+ * @ROUTE @PUT {{URL}}/api/v1/user/update/:id
+ * @ACCESS Private (Logged in user only)
+ */
+export const myLearning = asyncHandler(async (req, res, next) => {
+
+  // const { id } = req.params;
+
+  // Retrieve user's email
+  const user = await User.findById(req.user.id);
+  const userEmail = user.email;
+
+  if (!user) {
+    return next(new AppError('Invalid user id or user does not exist'));
+  }
+
+  // Query the EnrolledUsersIYFA collection to check if the user's email exists for the 'IYFA' course
+  const enrolledUserIYFA = await EnrolledUsersIYFA.findOne({ email: userEmail });
+
+  // Query the EnrolledUsersYLP collection to check if the user's email exists for the 'YLP' course
+  const enrolledUserYLP = await EnrolledUsersYLP.findOne({ email: userEmail });
+
+  // if (!enrolledUserIYFA) {
+  //   return res.status(200).json({
+  //     success: true,
+  //     message: 'IYFA course not purchased by the user',
+  //     data: [],
+  //   });
+  // }
+
+  // if (!enrolledUserYLP) {
+  //   return res.status(200).json({
+  //     success: true,
+  //     message: 'IYFA course not purchased by the user',
+  //     data: [],
+  //   });
+  // }
+
+  // Initialize arrays to store purchased courses
+  let purchasedCoursesIYFA = [];
+  let purchasedCoursesYLP = [];
+
+  // If the user is enrolled, fetch the courses related to that user for the 'IYFA' course
+  if (enrolledUserIYFA) {
+    purchasedCoursesIYFA = await Course.find({ title: 'IYFA' });
+  }
+
+  // If the user is enrolled, fetch the courses related to that user for the 'YLP' course
+  if (enrolledUserYLP) {
+    purchasedCoursesYLP = await Course.find({ title: 'YLP' });
+  }
+
+  // Combine the purchased courses for both 'IYFA' and 'YLP'
+  const allPurchasedCourses = [...purchasedCoursesIYFA, ...purchasedCoursesYLP];
+
+  res.status(200).json({
+    success: true,
+    message: 'User\'s Purchased Courses fetched successfully',
+    data: allPurchasedCourses,
   });
 });

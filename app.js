@@ -14,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Third-Party
 app.use(
+  // cors()
   cors({
     origin: [process.env.FRONTEND_URL],
     credentials: true,
@@ -37,6 +38,10 @@ app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1', miscRoutes);
+
+app.get('/check', (req, res) => {
+  res.json({"users": ["userOne", "userTwo", "userThree"]})
+})
 
 // Default catch all route - 404
 app.all('*', (_req, res) => {
