@@ -8,7 +8,8 @@ import {
   registerUser,
   resetPassword,
   updateUser,
-  myLearning
+  myLearning,
+  emailTesting
 } from "../controllers/user.controller.js";
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
@@ -24,5 +25,6 @@ router.post("/reset/:resetToken", resetPassword);
 router.post("/change-password", isLoggedIn, changePassword);
 router.put("/update/:id", isLoggedIn, upload.single("avatar"), updateUser);
 router.post("/my-learning", isLoggedIn, myLearning);
+router.post("/email-testing", isLoggedIn, emailTesting);
 
 export default router;

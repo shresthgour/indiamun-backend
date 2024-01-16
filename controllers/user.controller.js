@@ -38,6 +38,8 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     return next(new AppError('Email already exists', 409));
   }
 
+  //  TODO: OTP VERIFICATION
+
   // Create new user with the given necessary data and save to DB
   const user = await User.create({
     fullName,
@@ -471,4 +473,51 @@ export const myLearning = asyncHandler(async (req, res, next) => {
     message: 'User\'s Purchased Courses fetched successfully',
     data: allPurchasedCourses,
   });
+});
+
+/**
+ * @UPDATE_USER
+ * @ROUTE @PUT {{URL}}/api/v1/user/update/:id
+ * @ACCESS Private (Logged in user only)
+ */
+export const emailTesting = asyncHandler(async (req, res, next) => {
+
+  const user = await User.findById(req.user.id);
+  const email = user.email;
+
+
+  // If no email send email required message
+  if (!email) {
+    return next(new AppError('Email is required', 400));
+  }
+
+  // If no email found send the message email not found
+  if (!user) {
+    return next(new AppError('Email not registered', 400));
+  }
+
+  // Saving the forgotPassword* to DB
+  await user.save();
+
+  // We here need to send an email to the user with the token
+  const subject = 'Email Testing';
+  const message = `This is just a test email.`;
+
+  try {
+    await sendEmail(email, subject, message);
+
+    // If email sent successfully send the success response
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${email} successfully`,
+    });
+  } catch (error) {
+
+    return next(
+      new AppError(
+        error.message || 'Something went wrong, please try again.',
+        500
+      )
+    );
+  }
 });
