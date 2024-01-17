@@ -9,6 +9,8 @@ import Payment from '../models/Payment.model.js';
 import Course from '../models/course.model.js';
 import {EnrolledUsersIYFA, EnrolledUsersYLP} from '../models/enrolledUsers.model.js';
 import { v4 as uuidv4 } from 'uuid';
+import generatePDFReceipt from '../utils/generatePDFReceipt.js';
+import sendEmail from '../utils/sendEmail.js';
 
 /**
  * @ACTIVATE_SUBSCRIPTION
@@ -61,8 +63,6 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
   try {
     // Extracting ID from request obj
     const { id } = req.user;
-
-    // const { course } = req.params;
 
     // Finding the user based on the ID
     const user = await User.findById(id);
@@ -133,13 +133,19 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
       email: user.email,
     });
 
+    // Generate PDF receipt details
+    const pdfDetails = await generatePDFReceipt(order);
+
+    // Send receipt via email
+    const attachments = [pdfDetails];
+    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
 
     res.status(200).json({
       success: true,
       order_id: order.id,
       amount: order.amount,
       currency: order.currency,
-      receipt: order.receipt,
+      receipt: 'Receipt sent via email',
     });
 
   } catch (error) {
@@ -153,6 +159,7 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
     });
   }
 });
+
 /**
  * @MAKE_PAYMENT
  * @ROUTE @POST {{URL}}/api/v1/payments/payment

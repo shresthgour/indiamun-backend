@@ -5,6 +5,7 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
 import errorMiddleware from './middlewares/error.middleware.js';
+import passport from 'passport';
 
 const app = express();
 
@@ -12,6 +13,10 @@ const app = express();
 // Built-In
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// app.use(passport.initialize());
+// app.use(passport.session());
+
 // Third-Party
 app.use(
   // cors()
@@ -32,16 +37,14 @@ app.get('/ping', (_req, res) => {
 import userRoutes from './routes/user.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import googleRoutes from './routes/google.routes.js';
 import miscRoutes from './routes/miscellaneous.routes.js';
 
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1', miscRoutes);
-
-app.get('/check', (req, res) => {
-  res.json({"users": ["userOne", "userTwo", "userThree"]})
-})
+app.use('/auth', googleRoutes);
 
 // Default catch all route - 404
 app.all('*', (_req, res) => {
