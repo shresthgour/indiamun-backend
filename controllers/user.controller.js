@@ -1,8 +1,6 @@
 import crypto from 'crypto';
 import fs from 'fs/promises';
-
 import cloudinary from 'cloudinary';
-
 import asyncHandler from '../middlewares/asyncHandler.middleware.js';
 import AppError from '../utils/AppError.js';
 import User from '../models/user.model.js';
@@ -13,12 +11,11 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import OTP from '../models/otp.model.js';
 
 const cookieOptions = {
-  secure: process.env.NODE_ENV === 'production' ? true : false,
+  // secure: process.env.NODE_ENV === 'production' ? true : false,
+  secure: false,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   httpOnly: true,
 };
-
-const otpStorage = {};
 
 /**
  * @REGISTER
@@ -66,7 +63,6 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     message: 'OTP sent to your email. Please verify.'
   });
 });
-
 
 /**
  * @REGISTER
@@ -213,11 +209,13 @@ export const loginUser = asyncHandler(async (req, res, next) => {
 
   // Setting the token in the cookie with name token along with cookieOptions
   res.cookie('token', token, cookieOptions);
+  console.log('Token from login function: ', token)
 
   // If all good send the response to the frontend
   res.status(200).json({
     success: true,
     message: 'User logged in successfully',
+    token,
     user,
   });
 });

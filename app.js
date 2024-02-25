@@ -19,11 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Third-Party
 app.use(
-  // cors()
-  cors({
-    origin: [process.env.FRONTEND_URL],
-    credentials: true,
-  })
+  cors()
+  // cors({
+  //   origin: [process.env.FRONTEND_URL],
+  //   credentials: true,
+  // })
 );
 app.use(morgan('dev'));
 app.use(cookieParser());

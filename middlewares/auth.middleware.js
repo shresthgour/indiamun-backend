@@ -9,6 +9,7 @@ export const isLoggedIn = asyncHandler(async (req, _res, next) => {
 
   // If no token send unauthorized message
   if (!token) {
+    console.log("Token from isLoggedIn Function: ", token)
     return next(new AppError("Unauthorized, please login to continue", 401));
   }
 
