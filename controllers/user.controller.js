@@ -23,45 +23,54 @@ const cookieOptions = {
  * @ACCESS Public
  */
 export const registerUser = asyncHandler(async (req, res, next) => {
-  // Destructuring the necessary data from req object
-  const { email } = req.body;
+  try {
+    // Destructuring the necessary data from req object
+    const { email } = req.body;
 
-  // Check if the data is there or not, if not throw error message
-  if (!email) {
-    return next(new AppError('All fields are required', 400));
+    // Check if the data is there or not, if not throw error message
+    if (!email) {
+      return next(new AppError('All fields are required', 400));
+    }
+
+    // Check if the user exists with the provided email
+    const userExists = await User.findOne({ email });
+
+    // If user exists send the reponse
+    if (userExists) {
+      return next(new AppError('Email already exists', 409));
+    }
+
+    //  OTP VERIFICATION
+
+    const min = 100000; // Minimum 6-digit number
+    const max = 999999; // Maximum 6-digit number
+    const otp = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // Save the OTP temporarily
+    await OTP.create({
+      email,
+      otp,
+      createdAt: new Date(),
+    });
+
+    // Send OTP to the user's email
+    const emailSubject = 'OTP Verification';
+    const emailMessage = `Your OTP for registration is: ${otp}`;
+    await sendEmail(email, emailSubject, emailMessage);
+
+    // Send a response to the client indicating that the OTP has been sent
+    res.status(201).json({
+      success: true,
+      message: 'OTP sent to your email. Please verify.'
+    });
+  } catch (error) {
+    return next(
+      new AppError(
+        error.message || 'Something went wrong, please try again.',
+        500
+      )
+    );
   }
-
-  // Check if the user exists with the provided email
-  const userExists = await User.findOne({ email });
-
-  // If user exists send the reponse
-  if (userExists) {
-    return next(new AppError('Email already exists', 409));
-  }
-
-  //  OTP VERIFICATION
-
-  const min = 100000; // Minimum 6-digit number
-  const max = 999999; // Maximum 6-digit number
-  const otp = Math.floor(Math.random() * (max - min + 1)) + min;
-
-  // Save the OTP temporarily
-  await OTP.create({
-    email,
-    otp,
-    createdAt: new Date(),
-  });
-
-  // Send OTP to the user's email
-  const emailSubject = 'OTP Verification';
-  const emailMessage = `Your OTP for registration is: ${otp}`;
-  await sendEmail(email, emailSubject, emailMessage);
-
-  // Send a response to the client indicating that the OTP has been sent
-  res.status(201).json({
-    success: true,
-    message: 'OTP sent to your email. Please verify.'
-  });
 });
 
 /**
@@ -94,7 +103,7 @@ export const verifyOTP = asyncHandler(async (req, res, next) => {
     const expirationTimeInMinutes = 5; // Set expiration time to 5 minutes (adjust as needed)
     const expirationTimeInMillis = expirationTimeInMinutes * 60 * 1000;
     return new Date().getTime() - new Date(createdAt).getTime() > expirationTimeInMillis;
-  };  
+  };
 
   try {
     // Check if the OTP matches the one saved temporarily
@@ -558,7 +567,6 @@ export const emailTesting = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
   const email = user.email;
 
-
   // If no email send email required message
   if (!email) {
     return next(new AppError('Email is required', 400));
@@ -585,7 +593,6 @@ export const emailTesting = asyncHandler(async (req, res, next) => {
       message: `Email sent to ${email} successfully`,
     });
   } catch (error) {
-
     return next(
       new AppError(
         error.message || 'Something went wrong, please try again.',

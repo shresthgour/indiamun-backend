@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Third-Party
 app.use(
-  cors()
+  cors()  
   // cors({
   //   origin: [process.env.FRONTEND_URL],
   //   credentials: true,

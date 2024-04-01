@@ -5,6 +5,9 @@ const sendEmail = async function (email, subject, message, attachments = []) {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.SMTP_MAIL_USERNAME,
       pass: process.env.SMTP_MAIL_PASSWORD,

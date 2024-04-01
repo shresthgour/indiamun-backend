@@ -4,6 +4,8 @@ import {
   verifySubscription,
   allPayments,
   makePayment,
+  checkout,
+  paymentVerification,
   paymentIYFA,
   paymentYLP
 } from '../controllers/payment.controller.js';
@@ -17,9 +19,11 @@ const router = Router();
 
 // router.route('/payment').post(isLoggedIn, makePayment);
 router.route('/payment-iyfa').post(isLoggedIn, paymentIYFA);
+router.route('/checkout').get(isLoggedIn, checkout);
+router.route('/paymentverification').post(paymentVerification);
 router.route('/payment-ylp').post(isLoggedIn, paymentYLP);
 router.route('/verify').post(isLoggedIn, verifySubscription);
-// router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
+router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
 // router.route('/').get(isLoggedIn, authorizeRoles('ADMIN'), allPayments);
 
 export default router;

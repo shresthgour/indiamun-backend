@@ -29,7 +29,7 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
       return next(new AppError('Unauthorized, please login'));
     }
 
-    // Checking the user role
+    // Checking the user role 
     if (user.role === 'ADMIN') {
       return next(new AppError('Admin cannot make a payment', 400));
     }
@@ -56,16 +56,29 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
         const response = await razorpay.orders.create(options)
         // Handle success
         console.log(response);
+
+        // Adding the user email in the enrolled user list
+        await EnrolledUsersIYFA.create({
+          email: user.email,
+        });
+
+        // Generate PDF receipt details
+        const pdfDetails = await generatePDFReceipt(order);
+
+        // Send receipt via email
+        const attachments = [pdfDetails];
+        await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
+
+        // const razorpayCheckout = new window.Razorpay(options);
+        // razorpayCheckout.open();
+
       } catch (error) {
         // Handle error
         console.log(error);
       }
-
-      const razorpayCheckout = new window.Razorpay(options);
-      razorpayCheckout.open();
     };
 
-    // handlePayment()
+    handlePayment()
 
     const orderIdPrefix = `order_${user._id}_${Date.now()}`;
     const truncatedOrderId = orderIdPrefix.slice(0, 40);
@@ -86,18 +99,6 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
     // Saving the user object
     await user.save();
 
-    // Adding the user email in the enrolled user list
-    await EnrolledUsersIYFA.create({
-      email: user.email,
-    });
-
-    // Generate PDF receipt details
-    const pdfDetails = await generatePDFReceipt(order);
-
-    // Send receipt via email
-    const attachments = [pdfDetails];
-    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
-
     res.status(200).json({
       success: true,
       order_id: order.id,
@@ -116,6 +117,79 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
       error: error.message, // Include the error message for debugging
     });
   }
+});
+
+export const checkout = asyncHandler(async (req, res, next) => {
+  try {
+    const razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_SECRET,
+    });
+
+    const options = {
+      amount: 100,
+      currency: 'INR',
+    }
+    const order = await razorpayInstance.orders.create(options)
+    console.log(order)
+
+    res.status(200).json({
+      success: true,
+      order,
+      message: 'Checkout Successful'
+    })
+  } catch (error) {
+    console.error('Payment Error:', error);
+
+    // Handle the error and send an appropriate response
+    res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+      error: error.message, // Include the error message for debugging
+    });
+  }
+});
+
+
+export const paymentVerification = asyncHandler(async (req, res, next) => {
+
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  // Generate a signature with SHA256 for verification purposes
+  // Here, the orderId should be unique for each payment
+  // razorpay_payment_id is from the frontend, and there should be a '|' character between this and orderId
+  // At the end convert it to Hex value
+
+  const body = razorpay_order_id + '|' + razorpay_payment_id;
+
+  const generatedSignature = crypto
+    .createHmac('sha256', process.env.RAZORPAY_SECRET)
+    .update(body.toString())
+    .digest('hex');
+
+  const isAuthentic = generatedSignature === razorpay_signature;
+
+  if (isAuthentic) {
+    // Database Comes
+    await Payment.create({
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    })
+
+    res.redirect(`http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`)
+
+  } else {
+    res.status(400).json({
+      success: false,
+      message: 'Payment not verified ',
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Payment verified successfully',
+  });
 });
 
 /**
@@ -340,7 +414,7 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
  */
 export const verifyPayment = asyncHandler(async (req, res, next) => {
   const { id } = req.user;
-  const { razorpay_payment_id, razorpay_signature } = req.body;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
   // Finding the user
   const user = await User.findById(id);
@@ -354,10 +428,25 @@ export const verifyPayment = asyncHandler(async (req, res, next) => {
   // Here, the orderId should be unique for each payment
   // razorpay_payment_id is from the frontend, and there should be a '|' character between this and orderId
   // At the end convert it to Hex value
+
+  const body = razorpay_order_id + '|' + razorpay_payment_id;
+
   const generatedSignature = crypto
     .createHmac('sha256', process.env.RAZORPAY_SECRET)
-    .update(`${razorpay_payment_id}|${user._id}`)
+    .update(body.toString())
     .digest('hex');
+
+  const isAuthentic = generatedSignature === razorpay_signature;
+
+  if (isAuthentic) {
+
+    // Database Comes
+
+    res.redirect(`http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`)
+
+  } else {
+
+  }
 
   // Check if the generated signature and signature received from the frontend match
   if (generatedSignature !== razorpay_signature) {
