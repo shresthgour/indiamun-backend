@@ -29,6 +29,10 @@ app.use(morgan('dev'));
 app.use(cookieParser());
 
 // Server Status Check Route
+app.get('/', (_req, res) => {
+  res.send('IndiaMun Backend is running!');
+});
+
 app.get('/ping', (_req, res) => {
   res.send('Pong');
 });
