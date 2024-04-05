@@ -45,7 +45,7 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
       });
 
       const options = {
-        amount: '100',
+        amount: '50000',
         currency: "INR",
         receipt: randomUUID,
         payment_capture: 1,
@@ -61,13 +61,6 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
         await EnrolledUsersIYFA.create({
           email: user.email,
         });
-
-        // Generate PDF receipt details
-        const pdfDetails = await generatePDFReceipt(order);
-
-        // Send receipt via email
-        const attachments = [pdfDetails];
-        await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
 
         // const razorpayCheckout = new window.Razorpay(options);
         // razorpayCheckout.open();
@@ -85,7 +78,7 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
 
     // Creating an order using razorpay
     const order = await razorpay.orders.create({
-      amount: process.env.PAYMENT_AMOUNT,
+      amount: process.env.PAYMENT_AMOUNT_IYFA,
       currency: process.env.CURRENCY,
       receipt: truncatedOrderId,
     });
@@ -95,6 +88,13 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
 
     // Adding the order ID to the user account
     user.payment.order_id = order.id;
+
+    // Generate PDF receipt details
+    const pdfDetails = await generatePDFReceipt(order);
+
+    // Send receipt via email
+    const attachments = [pdfDetails];
+    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
 
     // Saving the user object
     await user.save();
@@ -186,10 +186,10 @@ export const paymentVerification = asyncHandler(async (req, res, next) => {
     });
   }
 
-  res.status(200).json({
-    success: true,
-    message: 'Payment verified successfully',
-  });
+  // res.status(200).json({
+  //   success: true,
+  //   message: 'Payment verified successfully',
+  // });
 });
 
 /**
@@ -229,7 +229,7 @@ export const paymentYLP = asyncHandler(async (req, res, next) => {
       const options = {
         // key_id: process.env.RAZORPAY_KEY_ID,
         // key_secret: process.env.RAZORPAY_SECRET,
-        amount: '100',
+        amount: process.env.PAYMENT_AMOUNT_YLP,
         currency: "INR",
         receipt: randomUUID,
         payment_capture: 1,
@@ -260,7 +260,7 @@ export const paymentYLP = asyncHandler(async (req, res, next) => {
 
     // Creating an order using razorpay
     const order = await razorpay.orders.create({
-      amount: process.env.PAYMENT_AMOUNT,
+      amount: process.env.PAYMENT_AMOUNT_YLP,
       currency: process.env.CURRENCY,
       receipt: truncatedOrderId,
     });
@@ -270,6 +270,13 @@ export const paymentYLP = asyncHandler(async (req, res, next) => {
 
     // Adding the order ID to the user account
     user.payment.order_id = order.id;
+
+    // Generate PDF receipt details
+    const pdfDetails = await generatePDFReceipt(order);
+
+    // Send receipt via email
+    const attachments = [pdfDetails];
+    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
 
     // Saving the user object
     await user.save();
