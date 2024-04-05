@@ -299,6 +299,45 @@ export const paymentYLP = asyncHandler(async (req, res, next) => {
   }
 });
 
+export const receiptCheck = asyncHandler(async (req, res, next) => {
+  try {
+    // Custom Order
+    const order = {
+      id: '1234',
+      amount: 100,
+      currency: 'INR',
+      receipt: 'ThanoZ',
+    };
+
+    const myEmail = 'akshat4575@gmail.com';
+
+    // Generate PDF receipt details
+    const pdfDetails = await generatePDFReceipt(order);
+
+    // Send receipt via email
+    const attachments = [pdfDetails];
+    await sendEmail(myEmail, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
+
+    res.status(200).json({
+      success: true,
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      receipt: order.receipt,
+    });
+
+  } catch (error) {
+    console.error('Payment Error:', error);
+
+    // Handle the error and send an appropriate response
+    res.status(500).json({
+      success: false,
+      message: 'Something went wrong',
+      error: error.message, // Include the error message for debugging
+    });
+  }
+});
+
 /**
  * @MAKE_PAYMENT
  * @ROUTE @POST {{URL}}/api/v1/payments/payment

@@ -7,7 +7,8 @@ import {
   checkout,
   paymentVerification,
   paymentIYFA,
-  paymentYLP
+  paymentYLP,
+  receiptCheck
 } from '../controllers/payment.controller.js';
 import {
   authorizeRoles,
@@ -24,6 +25,7 @@ router.route('/paymentverification').post(paymentVerification);
 router.route('/payment-ylp').post(isLoggedIn, paymentYLP);
 router.route('/verify').post(isLoggedIn, verifySubscription);
 router.route('/razorpay-key').get(isLoggedIn, getRazorpayApiKey);
+router.route('/rcheck').get(receiptCheck);
 // router.route('/').get(isLoggedIn, authorizeRoles('ADMIN'), allPayments);
 
 export default router;

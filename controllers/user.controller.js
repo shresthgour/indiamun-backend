@@ -113,11 +113,6 @@ export const verifyOTP = asyncHandler(async (req, res, next) => {
         fullName,
         email,
         password,
-        avatar: {
-          public_id: email,
-          secure_url:
-            'https://res.cloudinary.com/du9jzqlpt/image/upload/v1674647316/avatar_drzgxv.jpg',
-        },
       });
 
       // If user not created send message response
@@ -128,31 +123,31 @@ export const verifyOTP = asyncHandler(async (req, res, next) => {
       }
 
       // Run only if user sends a file
-      if (req.file) {
-        try {
-          const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: 'lms', // Save files in a folder named lms
-            width: 250,
-            height: 250,
-            gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
-            crop: 'fill',
-          });
+      // if (req.file) {
+      //   try {
+      //     const result = await cloudinary.v2.uploader.upload(req.file.path, {
+      //       folder: 'lms', // Save files in a folder named lms
+      //       width: 250,
+      //       height: 250,
+      //       gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
+      //       crop: 'fill',
+      //     });
 
-          // If success
-          if (result) {
-            // Set the public_id and secure_url in DB
-            user.avatar.public_id = result.public_id;
-            user.avatar.secure_url = result.secure_url;
+      //     // If success
+      //     if (result) {
+      //       // Set the public_id and secure_url in DB
+      //       user.avatar.public_id = result.public_id;
+      //       user.avatar.secure_url = result.secure_url;
 
-            // After successful upload remove the file from local storage
-            fs.rm(`uploads/${req.file.filename}`);
-          }
-        } catch (error) {
-          return next(
-            new AppError(error || 'File not uploaded, please try again', 400)
-          );
-        }
-      }
+      //       // After successful upload remove the file from local storage
+      //       fs.rm(`uploads/${req.file.filename}`);
+      //     }
+      //   } catch (error) {
+      //     return next(
+      //       new AppError(error || 'File not uploaded, please try again', 400)
+      //     );
+      //   }
+      // }
 
       // Save the user object
       await user.save();
@@ -455,35 +450,35 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     user.fullName = fullName;
   }
 
-  // Run only if user sends a file
-  if (req.file) {
-    // Deletes the old image uploaded by the user
-    await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+  // // Run only if user sends a file
+  // if (req.file) {
+  //   // Deletes the old image uploaded by the user
+  //   await cloudinary.v2.uploader.destroy(user.avatar.public_id);
 
-    try {
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: 'lms', // Save files in a folder named lms
-        width: 250,
-        height: 250,
-        gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
-        crop: 'fill',
-      });
+  //   try {
+  //     const result = await cloudinary.v2.uploader.upload(req.file.path, {
+  //       folder: 'lms', // Save files in a folder named lms
+  //       width: 250,
+  //       height: 250,
+  //       gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
+  //       crop: 'fill',
+  //     });
 
-      // If success
-      if (result) {
-        // Set the public_id and secure_url in DB
-        user.avatar.public_id = result.public_id;
-        user.avatar.secure_url = result.secure_url;
+  //     // If success
+  //     if (result) {
+  //       // Set the public_id and secure_url in DB
+  //       user.avatar.public_id = result.public_id;
+  //       user.avatar.secure_url = result.secure_url;
 
-        // After successful upload remove the file from local storage
-        fs.rm(`uploads/${req.file.filename}`);
-      }
-    } catch (error) {
-      return next(
-        new AppError(error || 'File not uploaded, please try again', 400)
-      );
-    }
-  }
+  //       // After successful upload remove the file from local storage
+  //       fs.rm(`uploads/${req.file.filename}`);
+  //     }
+  //   } catch (error) {
+  //     return next(
+  //       new AppError(error || 'File not uploaded, please try again', 400)
+  //     );
+  //   }
+  // }
 
   // Save the user object
   await user.save();
