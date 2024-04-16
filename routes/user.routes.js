@@ -29,6 +29,6 @@ router.post("/change-password", isLoggedIn, changePassword);
 router.put("/update/:id", isLoggedIn, updateUser);
 // router.put("/update/:id", isLoggedIn, upload.single("avatar"), updateUser);
 router.post("/my-learning", isLoggedIn, myLearning);
-router.post("/email-testing", isLoggedIn, emailTesting);
+router.get("/email-testing", emailTesting);
 
 export default router;

@@ -61,7 +61,7 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     // Send a response to the client indicating that the OTP has been sent
     res.status(201).json({
       success: true,
-      message: 'OTP sent to your email. Please verify.'
+      message: 'OTP sent to your email'
     });
   } catch (error) {
     return next(
@@ -241,6 +241,264 @@ export const logoutUser = asyncHandler(async (_req, res, _next) => {
   res.status(200).json({
     success: true,
     message: 'User logged out successfully',
+  });
+});
+
+
+export const emailCheck = asyncHandler(async (req, res, next) => {
+
+  try {
+    const email = 'akshat4575@gmail.com'
+
+    const currentDate = new Date(); // Get the current date and time
+
+    // Create an array of month names
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    // Get the day of the month (1-31)
+    const day = currentDate.getDate();
+
+    // Get the month (0-11, so we add 1)
+    const month = monthNames[currentDate.getMonth()];
+
+    // Get the year
+    const year = currentDate.getFullYear();
+
+    // Format the date as "5 May 2023"
+    const formattedDate = `${day} ${month} ${year}`;
+
+    const orderID = '2wwf32ere433'
+
+    const htmlContent = `<!DOCTYPE html>
+  <html lang="en">
+  
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <!-- <title>Document</title> -->
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+  
+        .main-container {
+          display: flex;
+          width: 100%;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        }
+  
+        .sub-container {
+          width: 600px;
+        }
+  
+        .main-logo {
+          margin-bottom: 25px;
+        }
+  
+        .order-id {
+          text-align: right;
+          margin-bottom: 25px;
+        }
+  
+        .gray-text {
+          color: gray;
+          font-size: 18px;
+        }
+  
+        .amount {
+          display: flex;
+          font-size: 18px;
+          margin-bottom: 25px;
+        }
+  
+        .amount2 {
+          margin-left: 10px;
+        }
+  
+        .text-bold {
+          font-weight: bolder;
+        }
+  
+        .date-box {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 65px;
+        }
+  
+        .table-main {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 45px;
+        }
+  
+        .table-heading {
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
+  
+        .table-main-right {
+          display: flex;
+          justify-content: space-around;
+        }
+  
+        .table-main-right-1 {
+          margin-right: 16px;
+        }
+  
+        .table-main-right-2 {
+          margin-right: 16px;
+        }
+  
+        .total-amount {
+          text-align: right;
+          font-size: 20px;
+          margin-bottom: 20px;
+        }
+  
+        .total-amount span{
+          margin-left: 30px;
+        }
+  
+        .blue-text {
+          text-align: right;
+          margin-bottom: 50px;
+          color: darkblue;
+        } 
+  
+        .blue-text span{
+          margin-left: 55px;
+        }
+  
+        .congo {
+          margin-bottom: 120px;
+        }
+  
+        .doubt {
+          margin-top: 30px;
+          margin-bottom: 60px;
+        }
+  
+        .last-section {
+          display: flex;
+          flex-direction: column;
+        }
+  
+        .last-p {
+          font-weight: 900;
+          margin-bottom: 10px;
+        }
+  
+        .secondlast {
+          margin-top: 10px;
+          margin-bottom: 10px;
+        }
+  
+        .last-links {
+          margin-bottom: 30px;
+        }
+      </style>
+    </head>
+  
+    <body>
+      <div class="main-container">
+        <div class="sub-container">
+          <div class="main-logo">
+            <img src="https://indiamun.org/static/media/logo%20left.548aa3eb.webp" alt="logo" width="180px">
+          </div>
+  
+          <div class="order-id gray-text">
+            <p class="">ORDER ID: ${orderID}</p>
+          </div>
+  
+          <div class="amount">
+            <p class="gray-text">AMOUNT PAID: </p>
+            <p class="text-bold amount2">₹ 2500.00</p>
+          </div>
+  
+          <div class="date-box">
+            <div class="date-box-1">
+              <p class="gray-text">ISSUED TO : </p>
+              <p class="">${formattedDate}</p>
+            </div>
+            <div class="date-box-2">
+              <p class="gray-text">PAID ON : </p>
+              <p class="">${formattedDate}</p>
+            </div>
+          </div>
+  
+          <div class="table-main">
+            <div class="table-main-left">
+              <p class="table-heading">DESCRIPTION</p>
+              <p class="">Amount</p>
+            </div>
+            <div class="table-main-right">
+              <div class="table-main-right-1">
+                <p class="table-heading">UNIT PRICE</p>
+                <p class="">₹ 2500.00</p>
+              </div>
+              <div class="table-main-right-2">
+                <p class="table-heading">QTY</p>
+                <p class="">1</p>
+              </div>
+              <div class="table-main-right-3">
+                <p class="table-heading">AMOUNT</p>
+                <p class="">₹ 2500.00</p>
+              </div>
+            </div>
+          </div>
+  
+          <div class="total-amount">
+            <p class="gap text-bold">Total <span>₹ 2500.00</span></p>
+          </div>
+  
+          <div class="paid-amount">
+            <p class="blue-text">Total <span>₹ 2500.00</span></p>
+          </div>
+  
+          <div class="congo">
+            <p>Congratulations! You have successfully registered for Youth Leadership Program.</p>
+          </div>
+        </div>
+      </div>
+  
+      <hr>
+  
+      <div class="doubt">If you have any questions, reply to this email or contact us at <a
+          href="mailto:secritariat@indiamun.org">secritariat@indiamun.org</a> </div>
+  
+      <div class="last-section">
+        <p class="last-p">Secretariat - India MUN</p>
+        <img width="120px" src="https://indiamun.org/static/media/logo%20left.548aa3eb.webp" alt="logo">
+        <a class="secondlast" href="mailto:secretariat@indiamun.org">secretariat@indiamun.org</a>
+        <div class="last-links"><a href="https://indiamun.org/">www.indiamun.org</a> | <a href="https://indiamun.org/">India MUN</a></div>
+      </div>
+  
+    </body>
+  
+  </html>`
+
+    await sendEmail(email, 'Email Test', 'Testing Email', htmlContent);
+
+  } catch (error) {
+    return next(
+      new AppError(
+        error.message || 'Something went wrong, please try again.',
+        500
+      )
+    );
+  }
+
+  // Sending the response
+  res.status(200).json({
+    success: true,
+    message: 'Email Sent successfully',
   });
 });
 
@@ -496,11 +754,12 @@ export const updateUser = asyncHandler(async (req, res, next) => {
  */
 export const myLearning = asyncHandler(async (req, res, next) => {
 
-  // const { id } = req.params;
+  const { id } = req.user;
 
   // Retrieve user's email
-  const user = await User.findById(req.user.id);
+  const user = await User.findById(id);
   const userEmail = user.email;
+  console.log(`userEmail: ${userEmail}`)
 
   if (!user) {
     return next(new AppError('Invalid user id or user does not exist'));
@@ -508,6 +767,7 @@ export const myLearning = asyncHandler(async (req, res, next) => {
 
   // Query the EnrolledUsersIYFA collection to check if the user's email exists for the 'IYFA' course
   const enrolledUserIYFA = await EnrolledUsersIYFA.findOne({ email: userEmail });
+  console.log(`enrolledUserIYFA: ${enrolledUserIYFA}`)
 
   // Query the EnrolledUsersYLP collection to check if the user's email exists for the 'YLP' course
   const enrolledUserYLP = await EnrolledUsersYLP.findOne({ email: userEmail });
@@ -559,34 +819,115 @@ export const myLearning = asyncHandler(async (req, res, next) => {
  */
 export const emailTesting = asyncHandler(async (req, res, next) => {
 
-  const user = await User.findById(req.user.id);
-  const email = user.email;
-
-  // If no email send email required message
-  if (!email) {
-    return next(new AppError('Email is required', 400));
-  }
-
-  // If no email found send the message email not found
-  if (!user) {
-    return next(new AppError('Email not registered', 400));
-  }
-
-  // Saving the forgotPassword* to DB
-  await user.save();
-
-  // We here need to send an email to the user with the token
-  const subject = 'Email Testing';
-  const message = `This is just a test email.`;
-
   try {
-    await sendEmail(email, subject, message);
+    const email = 'akshat4575@gmail.com'
 
-    // If email sent successfully send the success response
-    res.status(200).json({
-      success: true,
-      message: `Email sent to ${email} successfully`,
-    });
+    const currentDate = new Date(); // Get the current date and time
+
+    // Create an array of month names
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    // Get the day of the month (1-31)
+    const day = currentDate.getDate();
+
+    // Get the month (0-11, so we add 1)
+    const month = monthNames[currentDate.getMonth()];
+
+    // Get the year
+    const year = currentDate.getFullYear();
+
+    // Format the date as "5 May 2023"
+    const formattedDate = `${day} ${month} ${year}`;
+
+    const orderID = '2wwf32ere433'
+
+    const htmlContent = `<!DOCTYPE html>
+    <html lang="en" style="margin: 0; padding: 0; box-sizing: border-box;">
+    
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    
+    <body style="margin: 0; padding: 0; box-sizing: border-box;">
+      <div style="display: flex; margin-left: 200px; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="width: 600px;">
+          <div style="margin-bottom: 25px;">
+            <img src="https://indiamun.org/static/media/logo%20left.548aa3eb.webp" alt="logo" width="180px">
+          </div>
+    
+          <div style="text-align: right; margin-bottom: 25px; color: gray; font-size: 18px;">
+            <p>ORDER ID: ${orderID}</p>
+          </div>
+    
+          <div style="display: flex; font-size: 18px; margin-bottom: 25px;">
+            <p style="color: gray;">AMOUNT PAID: </p>
+            <p style="margin-left: 10px; font-weight: bolder;">₹ 2500.00</p>
+          </div>
+    
+          <div style="display: flex; width: 100%; justify-content: space-between; margin-bottom: 65px;">
+            <div>
+              <p style="color: gray;">ISSUED TO : </p>
+              <p>${email}</p>
+            </div>
+            <div style="margin-left: 370px">
+              <p style="color: gray;">PAID ON : </p>
+              <p>${formattedDate}</p>
+            </div>
+          </div>
+    
+          <div style="display: flex; width: 100%; justify-content: space-between; margin-bottom: 45px;">
+            <div>
+              <p style="margin-bottom: 10px; font-weight: bold;">DESCRIPTION</p>
+              <p>Amount</p>
+            </div>
+            <div style="display: flex; margin-left:310px; justify-content: space-around;">
+              <div style="margin-right: 16px;">
+                <p style="margin-bottom: 10px; font-weight: bold;">UNIT PRICE</p>
+                <p>₹ 2500.00</p>
+              </div>
+              <div style="margin-right: 16px;">
+                <p style="margin-bottom: 10px; font-weight: bold;">QTY</p>
+                <p>1</p>
+              </div>
+              <div>
+                <p style="margin-bottom: 10px; font-weight: bold;">AMOUNT</p>
+                <p>₹ 2500.00</p>
+              </div>
+            </div>
+          </div>
+    
+          <div style="text-align: right; font-size: 20px; margin-bottom: 20px;">
+            <p style="font-weight: bolder;">Total <span style="margin-left: 30px;">₹ 2500.00</span></p>
+          </div>
+    
+          <div style="text-align: right; margin-bottom: 50px; color: darkblue;">
+            <p>Total <span style="margin-left: 55px;">₹ 2500.00</span></p>
+          </div>
+    
+          <div style="margin-bottom: 120px;">
+            <p>Congratulations! You have successfully registered for Youth Leadership Program.</p>
+          </div>
+        </div>
+      </div>
+    
+      <hr>
+    
+      <div style="margin-top: 30px; margin-bottom: 60px;">If you have any questions, reply to this email or contact us at <a
+          href="mailto:secritariat@indiamun.org">secritariat@indiamun.org</a> </div>
+    
+      <div style="display: flex; flex-direction: column;">
+        <div style="margin-bottom: 30px;"><a href="https://indiamun.org/">www.indiamun.org</a> | <a href="https://indiamun.org/">India MUN</a></div>
+      </div>
+    
+    </body>
+    
+    </html>`
+
+    await sendEmail(email, 'Email Test', 'Testing Email', htmlContent);
+
   } catch (error) {
     return next(
       new AppError(
@@ -595,4 +936,10 @@ export const emailTesting = asyncHandler(async (req, res, next) => {
       )
     );
   }
+
+  // Sending the response
+  res.status(200).json({
+    success: true,
+    message: 'Email Sent successfully',
+  });
 });

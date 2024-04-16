@@ -17,6 +17,99 @@ import sendEmail from '../utils/sendEmail.js';
  * @ROUTE @POST {{URL}}/api/v1/payments/payment
  * @ACCESS Private (Logged in user only)
  */
+// export const paymentIYFA = asyncHandler(async (req, res, next) => {
+//   try {
+//     // Extracting ID from request obj
+//     const { id } = req.user;
+
+//     // Finding the user based on the ID
+//     const user = await User.findById(id);
+
+//     if (!user) {
+//       return next(new AppError('Unauthorized, please login'));
+//     }
+
+//     // Checking the user role 
+//     if (user.role === 'ADMIN') {
+//       return next(new AppError('Admin cannot make a payment', 400));
+//     }
+
+//     // This uuidv4() function creates different id everytime its called
+//     const randomUUID = uuidv4()
+//     // console.log(`UUID: `, randomUUID)
+
+//     const handlePayment = async () => {
+//       const razorpay = new Razorpay({
+//         key_id: process.env.RAZORPAY_KEY_ID,
+//         key_secret: process.env.RAZORPAY_SECRET,
+//       });
+
+//       const options = {
+//         amount: 100,
+//         currency: "INR",
+//         receipt: randomUUID,
+//         payment_capture: 1,
+//       };
+
+//       try {
+//         // const response = await razorpay.createPaymentOrder(options);
+//         const response = await razorpay.orders.create(options)
+//         // Handle success
+//         console.log(response);
+
+//         // Adding the user email in the enrolled user list
+//         await EnrolledUsersIYFA.create({ email: user.email });
+
+//         // const razorpayCheckout = new window.Razorpay(options);
+//         // razorpayCheckout.open();
+
+//       } catch (error) {
+//         // Handle error
+//         console.log(error);
+//       }
+//     };
+
+//     handlePayment()
+
+//     const orderIdPrefix = `order_${user._id}_${Date.now()}`;
+//     const truncatedOrderId = orderIdPrefix.slice(0, 40);
+
+//     // Creating an order using razorpay
+//     const order = await razorpay.orders.create({
+//       amount: process.env.PAYMENT_AMOUNT_IYFA,
+//       currency: process.env.CURRENCY,
+//       receipt: truncatedOrderId,
+//     });
+
+//     // Ensure user.payment is defined before accessing its properties
+//     user.payment = user.payment || {};
+
+//     // Adding the order ID to the user account
+//     user.payment.order_id = order.id;
+
+//     // Saving the user object
+//     await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       order_id: order.id,
+//       amount: order.amount,
+//       currency: order.currency,
+//       receipt: 'Receipt sent via email',
+//     });
+
+//   } catch (error) {
+//     console.error('Payment Error:', error);
+
+//     // Handle the error and send an appropriate response
+//     res.status(500).json({
+//       success: false,
+//       message: 'Something went wrong',
+//       error: error.message, // Include the error message for debugging
+//     });
+//   }
+// });
+
 export const paymentIYFA = asyncHandler(async (req, res, next) => {
   try {
     // Extracting ID from request obj
@@ -24,97 +117,82 @@ export const paymentIYFA = asyncHandler(async (req, res, next) => {
 
     // Finding the user based on the ID
     const user = await User.findById(id);
-
     if (!user) {
       return next(new AppError('Unauthorized, please login'));
     }
 
-    // Checking the user role 
+    // Checking the user role
     if (user.role === 'ADMIN') {
       return next(new AppError('Admin cannot make a payment', 400));
     }
 
     // This uuidv4() function creates different id everytime its called
-    const randomUUID = uuidv4()
-    // console.log(`UUID: `, randomUUID)
+    const randomUUID = uuidv4();
 
     const handlePayment = async () => {
       const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_KEY_ID,
         key_secret: process.env.RAZORPAY_SECRET,
       });
-
       const options = {
-        amount: '50000',
+        amount: 100,
         currency: "INR",
         receipt: randomUUID,
         payment_capture: 1,
       };
 
       try {
-        // const response = await razorpay.createPaymentOrder(options);
-        const response = await razorpay.orders.create(options)
-        // Handle success
+        const response = await razorpay.orders.create(options);
         console.log(response);
+        const orderIdPrefix = `order_${user._id}_${Date.now()}`;
+        const truncatedOrderId = orderIdPrefix.slice(0, 40);
 
-        // Adding the user email in the enrolled user list
-        await EnrolledUsersIYFA.create({
-          email: user.email,
+        // Creating an order using razorpay
+        const order = await razorpay.orders.create({
+          amount: process.env.PAYMENT_AMOUNT_IYFA,
+          currency: process.env.CURRENCY,
+          receipt: truncatedOrderId,
         });
 
-        // const razorpayCheckout = new window.Razorpay(options);
-        // razorpayCheckout.open();
+        // Ensure user.payment is defined before accessing its properties
+        user.payment = user.payment || {};
 
+        // Adding the order ID to the user account
+        user.payment.order_id = order.id;
+
+        // Saving the user object
+        await user.save();
+
+        // Adding the user email in the enrolled user list only if the payment is successful
+        await EnrolledUsersIYFA.create({ email: user.email });
+
+        res.status(200).json({
+          success: true,
+          order_id: order.id,
+          amount: order.amount,
+          currency: order.currency,
+          receipt: 'Receipt sent via email',
+        });
       } catch (error) {
-        // Handle error
         console.log(error);
+        // Handle error
+        res.status(500).json({
+          success: false,
+          message: 'Something went wrong',
+          error: error.message,
+        });
       }
     };
 
-    handlePayment()
-
-    const orderIdPrefix = `order_${user._id}_${Date.now()}`;
-    const truncatedOrderId = orderIdPrefix.slice(0, 40);
-
-    // Creating an order using razorpay
-    const order = await razorpay.orders.create({
-      amount: process.env.PAYMENT_AMOUNT_IYFA,
-      currency: process.env.CURRENCY,
-      receipt: truncatedOrderId,
-    });
-
-    // Ensure user.payment is defined before accessing its properties
-    user.payment = user.payment || {};
-
-    // Adding the order ID to the user account
-    user.payment.order_id = order.id;
-
-    // Generate PDF receipt details
-    const pdfDetails = await generatePDFReceipt(order);
-
-    // Send receipt via email
-    const attachments = [pdfDetails];
-    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
-
-    // Saving the user object
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      receipt: 'Receipt sent via email',
-    });
+    // Call the handlePayment function inside the try block
+    await handlePayment();
 
   } catch (error) {
     console.error('Payment Error:', error);
-
-    // Handle the error and send an appropriate response
     res.status(500).json({
       success: false,
       message: 'Something went wrong',
-      error: error.message, // Include the error message for debugging
+      error: error.message,
     });
   }
 });
@@ -272,11 +350,11 @@ export const paymentYLP = asyncHandler(async (req, res, next) => {
     user.payment.order_id = order.id;
 
     // Generate PDF receipt details
-    const pdfDetails = await generatePDFReceipt(order);
+    // const pdfDetails = await generatePDFReceipt(order);
 
     // Send receipt via email
-    const attachments = [pdfDetails];
-    await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
+    // const attachments = [pdfDetails];
+    // await sendEmail(user.email, 'Payment Receipt', 'Thank you for purchasing our course!', attachments);
 
     // Saving the user object
     await user.save();
@@ -363,9 +441,9 @@ export const makePayment = asyncHandler(async (req, res, next) => {
     }
 
     // Checking the user role
-    if (user.role === 'ADMIN') {
-      return next(new AppError('Admin cannot make a payment', 400));
-    }
+    // if (user.role === 'ADMIN') {
+    //   return next(new AppError('Admin cannot make a payment', 400));
+    // }
 
     const orderIdPrefix = `order_${user._id}_${Date.now()}`;
     const truncatedOrderId = orderIdPrefix.slice(0, 40);

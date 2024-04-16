@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 // async..await is not allowed in global scope, must use a wrapper
-const sendEmail = async function (email, subject, message, attachments = []) {
+const sendEmail = async function (email, subject, message, htmlContent) {
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -20,10 +20,7 @@ const sendEmail = async function (email, subject, message, attachments = []) {
     to: email, // user email
     subject: subject, // Subject line
     text: message, // text
-    attachments: attachments.map((attachment) => ({
-      filename: attachment.filename,
-      path: attachment.path
-    })),
+    html: htmlContent
   });
 };
 
